@@ -67,7 +67,7 @@ Each recipe must include:
           { role: "system", content: systemPrompt },
           { role: "user", content: `Goals: ${goals}. Allergies: ${allergies}.` }
         ],
-        temperature: 0.7,
+        temperature: 1,
         max_tokens: 4000
       }),
     });
