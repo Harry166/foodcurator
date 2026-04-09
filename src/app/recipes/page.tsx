@@ -7,6 +7,8 @@ import { X, Clock, Flame, ArrowLeft, ArrowRight } from "lucide-react";
 import styles from "./page.module.css";
 
 type Recipe = {
+  title: string;
+  description: string;
   time: string;
   calories: string;
   visual_keyword: string;
