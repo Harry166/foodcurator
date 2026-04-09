@@ -334,6 +334,232 @@
   font-size: 1.1rem;
 }
 
+.recipeCard:hover .cardTitle {
+  color: var(--accent);
+}
+
+.masterclassContainer {
+  min-height: 100vh;
+  background-color: var(--bg-paper);
+}
+
+.masterHero {
+  position: relative;
+  height: 50vh; /* Fixed rectangular height */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+}
+
+.masterImageWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.masterHeroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: sepia(0.02) brightness(0.95); /* Extremely subtle tint */
+}
+
+.masterAttribution {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  z-index: 10;
+  background: rgba(0,0,0,0.2);
+  padding: 0.5rem 1rem;
+  backdrop-filter: blur(5px);
+}
+
+.masterContentBody {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 6rem 2rem;
+}
+
+.masterHeader {
+  text-align: center;
+  margin-bottom: 8rem;
+}
+
+.masterLabel {
+  font-family: var(--font-serif); /* Forced Serif */
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  margin-bottom: 2.5rem;
+}
+
+.masterTitle {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 1;
+  margin-bottom: 4rem;
+  letter-spacing: -0.04em;
+  color: var(--text-base);
+}
+
+.masterMeta {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  font-family: var(--font-serif); /* Forced Serif */
+  font-size: 1.1rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  color: rgba(0,0,0,0.6);
+}
+
+.masterMeta span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.masterIntroduction {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 4rem;
+  margin-bottom: 10rem;
+  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  padding-bottom: 8rem;
+}
+
+.introLead {
+  font-family: var(--font-serif); /* Forced Serif */
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.masterDescription {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  line-height: 1.4;
+  color: rgba(0,0,0,0.85);
+  font-style: italic;
+}
+
+/* Detailed Grid */
+.recipeDetailsGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 10rem;
+}
+
+.sectionHeading {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  margin-bottom: 4rem;
+  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  padding-bottom: 1rem;
+}
+
+.ingredientsSection ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.ingredientsSection li {
+  font-family: var(--font-serif); /* Forced Serif */
+  font-size: 1.2rem;
+  font-style: italic;
+  padding-bottom: 1.5rem;
+  border-bottom: 0.5px solid rgba(0,0,0,0.05);
+  color: rgba(0,0,0,0.8);
+}
+
+.methodSection ol {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+}
+
+.methodSection li {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 3rem;
+}
+
+.stepNum {
+  font-family: var(--font-serif);
+  font-size: 2.22rem;
+  color: var(--accent);
+  opacity: 0.4;
+}
+
+.methodSection p {
+  font-family: var(--font-serif); /* Forced Serif */
+  font-size: 1.35rem;
+  line-height: 1.7;
+  color: rgba(0,0,0,0.85);
+}
+
+.masterFooter {
+  margin-top: 15rem;
+  padding-top: 6rem;
+  border-top: 0.5px solid rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 968px) {
+  .masterHero {
+    height: 40vh;
+  }
+  
+  .masterIntroduction {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  
+  .recipeDetailsGrid {
+    grid-template-columns: 1fr;
+    gap: 8rem;
+  }
+  
+  .masterTitle {
+    font-size: 3.5rem;
+  }
+}
+
+.divider {
+  height: 0.5px;
+  background: rgba(0,0,0,0.1);
+  margin-top: auto;
+}
+
+/* Invalid / Guardrail Screen */
+.invalidContainer {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
 .instructions ol {
   list-style: none;
   display: flex;
@@ -362,12 +588,12 @@
   padding-top: 0.5rem;
 }
 .invalidContainer {
-  min-height: 80vh;
+  min-height: 70vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 4rem;
+  justify-content: center;
   text-align: center;
+  padding: 2rem;
 }
 
 .invalidContent {
