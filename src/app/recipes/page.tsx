@@ -29,22 +29,19 @@ function RecipesContent() {
 
   const [progress, setProgress] = useState(0);
 
+  // Sync progress bar with streaming recipes
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (loading) {
-      interval = setInterval(() => {
-        setProgress(prev => {
-          if (prev < 90) return prev + 5; // Steadier, less frequent small updates
-          return prev;
-        });
-      }, 1200); // Increased interval for stability
+    if (!loading && !isInvalid && !errorMsg) {
+      setProgress((recipes.length / 4) * 100);
     }
-    return () => clearInterval(interval);
-  }, [loading]);
+  }, [recipes.length, loading, isInvalid, errorMsg]);
 
   useEffect(() => {
     async function fetchRecipes() {
       setErrorMsg(null);
+      setRecipes([]); // Reset for new curation
+      setLoading(true);
+
       try {
         const res = await fetch("/api/generate", {
           method: "POST",
@@ -52,23 +49,77 @@ function RecipesContent() {
           body: JSON.stringify({ goals, allergies }),
         });
         
-        const data = await res.json();
-        
         if (!res.ok) {
-          throw new Error(data.error || "Biological curation timed out.");
+          const data = await res.json();
+          throw new Error(data.error || "Biological curation interrupted.");
         }
 
-        if (data.invalid) {
-          setIsInvalid(true);
-        } else if (data.recipes) {
-          setRecipes(data.recipes);
-          setProgress(100);
+        const reader = res.body?.getReader();
+        if (!reader) throw new Error("No response body.");
+
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let inArray = false;
+        let braceCount = 0;
+        let objectBuffer = "";
+
+        // Immediately stop the initial loader once the stream starts
+        setLoading(false);
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const text = decoder.decode(value, { stream: true });
+          buffer += text;
+
+          // Simple stream parser for JSON objects within the "recipes" array
+          for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            
+            // Look for the "recipes" array start
+            if (!inArray && buffer.includes('"recipes": [')) {
+              inArray = true;
+              buffer = ""; // Clear buffer after finding array start
+            }
+
+            if (inArray) {
+              if (char === '{') {
+                braceCount++;
+                objectBuffer += char;
+              } else if (char === '}') {
+                braceCount--;
+                objectBuffer += char;
+                
+                if (braceCount === 0 && objectBuffer.trim()) {
+                  // Found a complete recipe object
+                  try {
+                    const recipe = JSON.parse(objectBuffer);
+                    setRecipes(prev => [...prev, recipe]);
+                    objectBuffer = "";
+                  } catch (e) {
+                    // JSON might still be incomplete if nested, continue
+                  }
+                }
+              } else if (braceCount > 0) {
+                objectBuffer += char;
+              }
+            }
+
+            // Early exit if invalid detected
+            if (!inArray && buffer.includes('"invalid": true')) {
+              setIsInvalid(true);
+              break;
+            }
+          }
         }
+        
+        setProgress(100);
       } catch (err: any) {
         console.error("Could not fetch recipes", err);
         setErrorMsg(err.message);
       } finally {
-        setTimeout(() => setLoading(false), 500);
+        setLoading(false);
       }
     }
     fetchRecipes();

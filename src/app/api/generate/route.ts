@@ -68,38 +68,70 @@ Each recipe must include:
           { role: "user", content: `Goals: ${goals}. Allergies: ${allergies}.` }
         ],
         temperature: 1,
-        max_tokens: 8000
+        max_tokens: 8000,
+        stream: true
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Remote API Error [${response.status}]:`, errorText);
-      
-      if (response.status === 401) {
-        throw new Error("API Authentication failed. Please check your account balance and ensure your key matches the chosen region (.cn vs .ai).");
-      }
       throw new Error(`Failed to fetch recipes from API: ${response.status} ${errorText}`);
     }
 
-    const data = await response.json();
-    let contentStr = data.choices[0].message.content;
+    // Set up a ReadableStream to pipe the response
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
 
-    // Robust JSON extraction
-    if (contentStr.includes("```json")) {
-      contentStr = contentStr.split("```json")[1].split("```")[0];
-    } else if (contentStr.includes("```")) {
-      contentStr = contentStr.split("```")[1].split("```")[0];
-    }
+    const stream = new ReadableStream({
+      async start(controller) {
+        if (!response.body) {
+          controller.close();
+          return;
+        }
 
-    try {
-      const content = JSON.parse(contentStr.trim());
-      return NextResponse.json(content);
-    } catch (parseError) {
-      console.error("Failed to parse AI response as JSON. Content preview:", contentStr.substring(0, 500) + "...");
-      console.error("Full Content (check for truncation):", contentStr);
-      throw parseError;
-    }
+        const reader = response.body.getReader();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine || trimmedLine === "data: [DONE]") continue;
+
+            if (trimmedLine.startsWith("data: ")) {
+              try {
+                const json = JSON.parse(trimmedLine.slice(6));
+                const content = json.choices[0]?.delta?.content || "";
+                if (content) {
+                  controller.enqueue(encoder.encode(content));
+                }
+              } catch (e) {
+                console.error("Error parsing stream chunk", e);
+              }
+            }
+          }
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      },
+    });
+
   } catch (error: any) {
     console.error("Recipe generation error:", error);
     return NextResponse.json({ 
