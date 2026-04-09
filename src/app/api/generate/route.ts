@@ -42,9 +42,9 @@ export async function POST(req: Request) {
 CRITICAL: First, validate if the user's prompt is related to food, cooking, health, or nutrition.
 If the prompt is completely unrelated (e.g. 'LEGO', 'car repairs', 'web design'), return ONLY this JSON: {"invalid": true}.
 
-If valid, generate 6 distinct, beautiful, high-end recipes based on the user's dietary goals and allergies. 
+If valid, generate 4 distinct, beautiful, high-end recipes based on the user's dietary goals and allergies. 
 Return ONLY a valid JSON object with a 'recipes' array. DO NOT include markdown formatting or backticks.
-CRITICAL: All generated text must be in English.
+CRITICAL: All generated text must be in English. Always close the JSON object properly.
 Each recipe must include: 
 - title (string, oversized and elegant)
 - description (2-3 sentences, poetic, sensory, and highly descriptive. This is the visual anchor of the card.)
@@ -68,7 +68,7 @@ Each recipe must include:
           { role: "user", content: `Goals: ${goals}. Allergies: ${allergies}.` }
         ],
         temperature: 1,
-        max_tokens: 4000
+        max_tokens: 8000
       }),
     });
 
