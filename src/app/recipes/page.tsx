@@ -25,6 +25,7 @@ function RecipesContent() {
   const [loading, setLoading] = useState(true);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isInvalid, setIsInvalid] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [progress, setProgress] = useState(0);
 
@@ -43,22 +44,29 @@ function RecipesContent() {
 
   useEffect(() => {
     async function fetchRecipes() {
+      setErrorMsg(null);
       try {
         const res = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ goals, allergies }),
         });
+        
         const data = await res.json();
         
+        if (!res.ok) {
+          throw new Error(data.error || "Biological curation timed out.");
+        }
+
         if (data.invalid) {
           setIsInvalid(true);
         } else if (data.recipes) {
           setRecipes(data.recipes);
           setProgress(100);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Could not fetch recipes", err);
+        setErrorMsg(err.message);
       } finally {
         setTimeout(() => setLoading(false), 500);
       }
@@ -88,6 +96,26 @@ function RecipesContent() {
                    transition={{ ease: "easeOut" }}
                 />
               </div>
+            </div>
+          </motion.div>
+        ) : errorMsg ? (
+          <motion.div
+            key="error"
+            className={styles.invalidContainer}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            suppressHydrationWarning
+          >
+            <div className={styles.invalidContent}>
+              <span className={styles.discrim}>Network Disturbance</span>
+              <h1 className={styles.invalidTitle}>The curation process was interrupted.</h1>
+              <p className={styles.invalidText}>{errorMsg || "Check your API connection and environment variables."}</p>
+              <button 
+                className={styles.backBtn}
+                onClick={() => router.push("/")}
+              >
+                Retry Curation <ArrowRight size={18} />
+              </button>
             </div>
           </motion.div>
         ) : isInvalid ? (
