@@ -100,8 +100,11 @@ Each recipe must include:
       console.error("Full Content (check for truncation):", contentStr);
       throw parseError;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Recipe generation error:", error);
-    return NextResponse.json({ error: "Failed to generate recipes" }, { status: 500 });
+    return NextResponse.json({ 
+      error: error.message || "Failed to generate recipes",
+      details: "Check your API key and endpoint configuration in the deployment dashboard."
+    }, { status: 500 });
   }
 }
